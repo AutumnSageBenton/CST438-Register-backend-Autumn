@@ -101,6 +101,20 @@ public class ScheduleController {
 		}
 	}
 	
+	/*
+	 * swap classes for a student
+	 */
+//	@Mapping("/schedule/{enrollment_id}")
+	@Transactional
+	public void swapCourse(@PathVariable int enrollment_id, int id) {
+		dropCourse(enrollment_id);
+		addCourse(id);
+	}
+	
+	
+	
+	
+	
 	/* 
 	 * helper method to transform course, enrollment, student entities into 
 	 * a an instances of ScheduleDTO to return to front end.

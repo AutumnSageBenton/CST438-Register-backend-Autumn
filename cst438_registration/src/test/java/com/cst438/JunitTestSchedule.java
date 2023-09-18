@@ -73,6 +73,7 @@ public class JunitTestSchedule {
 		assertEquals(true, found, "Added course not in updated schedule.");
 		
 	}
+	
 	/*
 	 * drop course 30157 Fall 2020 from student test@csumb.edu
 	 */
@@ -116,7 +117,54 @@ public class JunitTestSchedule {
 		}
 		assertFalse(found);
 	}
-		
+	
+	/*
+	 * Verify  	 
+	 */
+//	@Test
+//	public void scheduleList() throws Exception {
+//		
+//		MockHttpServletResponse response;
+//
+//		response = mvc.perform(
+//				MockMvcRequestBuilders
+//			      .post("/schedule?year=2020&semester=Fall")
+//			      .contentType(MediaType.APPLICATION_JSON)
+//			      .accept(MediaType.APPLICATION_JSON))
+//				.andReturn().getResponse();
+//		
+//		// verify that return status = OK (value 200) 
+//		assertEquals(200, response.getStatus());
+//		
+//		// verify that returned data has non zero primary key
+//		ScheduleDTO result = fromJsonString(response.getContentAsString(), ScheduleDTO.class);
+//		assertNotEquals( 0  , result.id());
+//		
+//		
+////		// do http GET for student schedule 
+////		response = mvc.perform(
+////				MockMvcRequestBuilders
+////			      .get("/schedule")
+////			      .accept(MediaType.APPLICATION_JSON))
+////				.andReturn().getResponse();
+////		
+////		// verify that return status = OK (value 200) 
+////		assertEquals(200, response.getStatus());
+//		
+//		// verify that returned data contains the added course 
+//		ScheduleDTO[] dto_list = fromJsonString(response.getContentAsString(), ScheduleDTO[].class);
+//		
+//		boolean found = false;	
+//		if(dto_list.length >= 1) {
+//			found = true;
+//		}
+//		assertEquals(true, found);
+//		
+//
+//	}
+//	
+	
+	
 	private static String asJsonString(final Object obj) {
 		try {
 			return new ObjectMapper().writeValueAsString(obj);
