@@ -45,18 +45,19 @@ public class StudentController {
 	@GetMapping("/major")
 	public SemesterDTO[] getSchedule( @RequestParam("year") int year, @RequestParam("semester") String semester, @RequestParam("title") String title ) {
 		System.out.println("/major called.");
-		String course_title = "CST";
+		String course_title = "CST 237%";
 		
-		Course course = courseRepository.findByTitle(course_title);
+		Course course = courseRepository.findByTitleLike(course_title);
+
 		if (course != null) {
-//			System.out.println("/major student "+course.getName()+" "+student.getStudent_id());
-			List<Course> courses = courseRepository.findStudentSchedule(course_title, year, semester);
+			List<Course> courses = courseRepository.findSchedule(course.getTitle(), year, semester);
 			SemesterDTO[] sched = createSemester(year, semester, course, courses);
 			return sched;
 		} else {
 			return new SemesterDTO[0];   // return empty schedule for unknown student.
 		}
 	}
+	
 	
 	
 	private SemesterDTO[] createSemester(int year, String semester, Course c, List<Course> courses) {

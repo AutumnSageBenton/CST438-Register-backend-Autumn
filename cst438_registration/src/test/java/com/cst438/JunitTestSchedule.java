@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.cst438.domain.ScheduleDTO;
+import com.cst438.domain.SemesterDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /* 
@@ -118,51 +119,31 @@ public class JunitTestSchedule {
 		assertFalse(found);
 	}
 	
+	
 	/*
-	 * Verify  	 
+	 * find courses by major CST
 	 */
-//	@Test
-//	public void scheduleList() throws Exception {
-//		
-//		MockHttpServletResponse response;
-//
-//		response = mvc.perform(
-//				MockMvcRequestBuilders
-//			      .post("/schedule?year=2020&semester=Fall")
-//			      .contentType(MediaType.APPLICATION_JSON)
-//			      .accept(MediaType.APPLICATION_JSON))
-//				.andReturn().getResponse();
-//		
-//		// verify that return status = OK (value 200) 
-//		assertEquals(200, response.getStatus());
-//		
-//		// verify that returned data has non zero primary key
-//		ScheduleDTO result = fromJsonString(response.getContentAsString(), ScheduleDTO.class);
-//		assertNotEquals( 0  , result.id());
-//		
-//		
-////		// do http GET for student schedule 
-////		response = mvc.perform(
-////				MockMvcRequestBuilders
-////			      .get("/schedule")
-////			      .accept(MediaType.APPLICATION_JSON))
-////				.andReturn().getResponse();
-////		
-////		// verify that return status = OK (value 200) 
-////		assertEquals(200, response.getStatus());
-//		
-//		// verify that returned data contains the added course 
-//		ScheduleDTO[] dto_list = fromJsonString(response.getContentAsString(), ScheduleDTO[].class);
-//		
-//		boolean found = false;	
-//		if(dto_list.length >= 1) {
-//			found = true;
-//		}
-//		assertEquals(true, found);
-//		
-//
-//	}
-//	
+	@Test
+	public void majorCourses() throws Exception {
+		MockHttpServletResponse response;
+
+		response = mvc.perform( MockMvcRequestBuilders
+	      .get("/major?year=2020&semester=Fall&title=CST")
+	      .accept(MediaType.APPLICATION_JSON))
+		.andReturn().getResponse();
+		
+		SemesterDTO[] dto_list = fromJsonString(response.getContentAsString(), SemesterDTO[].class);
+
+		System.out.println("\nLENGTH: " + dto_list.length);
+		
+		boolean found = false;
+		for (SemesterDTO dto : dto_list) {
+			if (dto.title().contains("CST")) found=true;
+			System.out.println(dto.title());
+		}
+		assertTrue(found);
+		
+	}
 	
 	
 	private static String asJsonString(final Object obj) {
