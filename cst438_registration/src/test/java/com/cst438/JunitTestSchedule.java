@@ -133,8 +133,6 @@ public class JunitTestSchedule {
 		.andReturn().getResponse();
 		
 		SemesterDTO[] dto_list = fromJsonString(response.getContentAsString(), SemesterDTO[].class);
-
-		System.out.println("\nLENGTH: " + dto_list.length);
 		
 		boolean found = false;
 		for (SemesterDTO dto : dto_list) {
