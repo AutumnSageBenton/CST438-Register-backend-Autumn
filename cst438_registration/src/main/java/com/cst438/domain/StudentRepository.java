@@ -7,5 +7,6 @@ public interface StudentRepository extends CrudRepository <Student, Integer> {
 	 Student findByEmail(String email); 
 	
 	 Student[] findByNameStartsWith(String name);
-
+	 
+	 Iterable<Student> findAll();
 }
