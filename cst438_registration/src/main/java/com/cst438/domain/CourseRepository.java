@@ -15,4 +15,6 @@ public interface CourseRepository extends CrudRepository <Course, Integer> {
 			@Param("year") int year, 
 			@Param("semester") String semester);
 	
+//	Course findById(int id);
+
 }

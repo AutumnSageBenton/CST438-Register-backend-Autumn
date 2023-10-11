@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cst438.domain.FinalGradeDTO;
+import com.cst438.domain.Student;
 import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentDTO;
 import com.cst438.domain.EnrollmentRepository;
@@ -33,6 +34,11 @@ public class GradebookServiceMQ implements GradebookService {
 		System.out.println("Start Message "+ student_email +" " + course_id); 
 		// create EnrollmentDTO, convert to JSON string and send to gradebookQueue
 		// TODO
+		Enrollment e = enrollmentRepository.findByEmailAndCourseId(student_email, course_id);
+		EnrollmentDTO dto = new EnrollmentDTO(e.getEnrollment_id(), student_email, student_name, course_id);
+		String dtoString = asJsonString(dto);
+		rabbitTemplate.convertAndSend(gradebookQueue.getName(), dtoString);
+		
 	}
 	
 	@RabbitListener(queues = "registration-queue")
@@ -45,9 +51,14 @@ public class GradebookServiceMQ implements GradebookService {
 		 */
 		
 		// deserialize the string message to FinalGradeDTO[] 
+		FinalGradeDTO[] grades = fromJsonString(message, FinalGradeDTO[].class);
 		
 		// TODO
-
+		for(FinalGradeDTO grade: grades) {
+			Enrollment e = enrollmentRepository.findByEmailAndCourseId(grade.studentEmail(), grade.courseId());
+			e.setCourseGrade(grade.grade());
+			enrollmentRepository.save(e);
+		}		
 	}
 	
 	private static String asJsonString(final Object obj) {
