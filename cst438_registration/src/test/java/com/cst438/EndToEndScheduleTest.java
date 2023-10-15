@@ -45,8 +45,8 @@ import com.cst438.domain.EnrollmentRepository;
 @SpringBootTest
 public class EndToEndScheduleTest {
 
-	public static final String CHROME_DRIVER_FILE_LOCATION = "C:/Users/661be/exercise5/exercise_5/chrome-win32/chrome.exe";
-
+	public static final String CHROME_DRIVER_FILE_LOCATION = "C:/Users/661be/438/chromedriver-win64/chromedriver-win64/chromedriver.exe";
+	
 	public static final String URL = "http://localhost:3000";
 
 	public static final String TEST_USER_EMAIL = "test@csumb.edu";
@@ -136,6 +136,6 @@ public class EndToEndScheduleTest {
 		} finally {
 			driver.quit();
 		}
-
 	}
+	
 }
