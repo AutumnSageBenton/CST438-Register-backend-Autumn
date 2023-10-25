@@ -17,37 +17,16 @@ public class User {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
-	private String alias;
-	private String firstName;
-	private String lastName;
-	private String email; 	
+	private String username; 	
 	private String password;
 	private String role;
 	
 	
-	public String getFirstName() {
-		return firstName;
+	public String getUsername() {
+		return username;
 	}
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-	public String getAlias() {
-		return alias;
-	}
-	public void setAlias(String alias) {
-		this.alias = alias;
-	}
-	public String getLastName() {
-		return lastName;
-	}
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 	public String getPassword() {
 		return password;
@@ -61,8 +40,8 @@ public class User {
 	public void setRole(String role) {
 		this.role = role;
 	}
-
-
+	
+	
 
 }
 
