@@ -1,6 +1,7 @@
 package com.cst438.controller;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,11 @@ import com.cst438.domain.EnrollmentRepository;
 import com.cst438.domain.Student;
 import com.cst438.domain.StudentDTO;
 import com.cst438.domain.StudentRepository;
+import com.cst438.domain.User;
+import com.cst438.domain.UserRepository;
+
+import java.security.Principal;
+
 
 @RestController
 @CrossOrigin 
@@ -33,83 +39,106 @@ public class StudentController {
 	@Autowired
 	EnrollmentRepository enrollmentRepository;
 	
+	@Autowired
+	UserRepository userRespository;
+	
 	@GetMapping("/student")
-	public StudentDTO[] getStudents() {
-		Iterable<Student> list = studentRepository.findAll();
-		ArrayList<StudentDTO> alist = new ArrayList<>();
-		for (Student s : list) {
-			StudentDTO sdto = new StudentDTO(s.getStudent_id(), s.getName(), s.getEmail(), s.getStatusCode(), s.getStatus());
-			alist.add(sdto);
+	public StudentDTO[] getStudents(Principal p) {
+		User user = userRespository.findByUsername(p.getName());
+		if(user.getRole().equals( "ADMIN")) {
+			Iterable<Student> list = studentRepository.findAll();
+			ArrayList<StudentDTO> alist = new ArrayList<>();
+			for (Student s : list) {
+				StudentDTO sdto = new StudentDTO(s.getStudent_id(), s.getName(), s.getEmail(), s.getStatusCode(), s.getStatus());
+				alist.add(sdto);
+			}
+			return alist.toArray(new StudentDTO[alist.size()]);
+		} else {
+			return null;
 		}
-		return alist.toArray(new StudentDTO[alist.size()]);
 	}
 	
 	@GetMapping("/student/{id}")
-	public StudentDTO getStudent(@PathVariable("id") int id) {
-		Student s = studentRepository.findById(id).orElse(null);
-		if (s!=null) {
-			StudentDTO sdto = new StudentDTO(s.getStudent_id(), s.getName(), s.getEmail(), s.getStatusCode(), s.getStatus());
-			return sdto;
+	public StudentDTO getStudent(Principal p, @PathVariable("id") int id) {
+		User user = userRespository.findByUsername(p.getName());
+		if(user.getRole().equals( "ADMIN")) {
+			Student s = studentRepository.findById(id).orElse(null);
+			if (s!=null) {
+				StudentDTO sdto = new StudentDTO(s.getStudent_id(), s.getName(), s.getEmail(), s.getStatusCode(), s.getStatus());
+				return sdto;
+			} else {
+				throw  new ResponseStatusException( HttpStatus.NOT_FOUND, "student not found "+id);
+			}
 		} else {
-			throw  new ResponseStatusException( HttpStatus.NOT_FOUND, "student not found "+id);
+			return null;
 		}
 	}
 	
 	@PutMapping("/student/{id}") 
-	public void updateStudent(@PathVariable("id")int id, @RequestBody StudentDTO sdto) {
-		Student s = studentRepository.findById(id).orElse(null);
-		if (s==null) {
-			throw  new ResponseStatusException( HttpStatus.NOT_FOUND, "student not found "+id);
+	public void updateStudent(Principal p, @PathVariable("id")int id, @RequestBody StudentDTO sdto) {
+		User user = userRespository.findByUsername(p.getName());
+		if(user.getRole().equals( "ADMIN")) {
+			Student s = studentRepository.findById(id).orElse(null);
+			if (s==null) {
+				throw  new ResponseStatusException( HttpStatus.NOT_FOUND, "student not found "+id);
+			}
+			// has email been changed, check that new email does not exist in database
+			if (!s.getEmail().equals(sdto.email())) {
+			// update name, email.  new email must not exist in database
+				Student check = studentRepository.findByEmail(sdto.email());
+				if (check != null) {
+					// error.  email exists.
+					throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "student email already exists "+sdto.email());
+				}
+			}
+			s.setEmail(sdto.email());
+			s.setName(sdto.name());
+			s.setStatusCode(sdto.statusCode());
+			s.setStatus(sdto.status());
+			studentRepository.save(s);
 		}
-		// has email been changed, check that new email does not exist in database
-		if (!s.getEmail().equals(sdto.email())) {
-		// update name, email.  new email must not exist in database
+	}
+	
+	@PostMapping("/student")
+	public int createStudent(Principal p, @RequestBody StudentDTO sdto) {
+		User user = userRespository.findByUsername(p.getName());
+		if(user.getRole().equals( "ADMIN")) {		
 			Student check = studentRepository.findByEmail(sdto.email());
 			if (check != null) {
 				// error.  email exists.
 				throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "student email already exists "+sdto.email());
 			}
+			Student s = new Student();
+			s.setEmail(sdto.email());
+			s.setName(sdto.name());
+			s.setStatusCode(sdto.statusCode());
+			s.setStatus(sdto.status());
+			studentRepository.save(s);
+			// return the database generated student_id 
+			return s.getStudent_id();
+		} else {
+			return 0;
 		}
-		s.setEmail(sdto.email());
-		s.setName(sdto.name());
-		s.setStatusCode(sdto.statusCode());
-		s.setStatus(sdto.status());
-		studentRepository.save(s);
-	}
-	
-	@PostMapping("/student")
-	public int createStudent(@RequestBody StudentDTO sdto) {
-		Student check = studentRepository.findByEmail(sdto.email());
-		if (check != null) {
-			// error.  email exists.
-			throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "student email already exists "+sdto.email());
-		}
-		Student s = new Student();
-		s.setEmail(sdto.email());
-		s.setName(sdto.name());
-		s.setStatusCode(sdto.statusCode());
-		s.setStatus(sdto.status());
-		studentRepository.save(s);
-		// return the database generated student_id 
-		return s.getStudent_id();
 	}
 	
 	@DeleteMapping("/student/{id}")
-	public void deleteStudent(@PathVariable("id") int id, @RequestParam("force") Optional<String> force) {
-		Student s = studentRepository.findById(id).orElse(null);
-		if (s!=null) {
-			// are there enrollments?
-			List<Enrollment> list = enrollmentRepository.findByStudentId(id);
-			if (list.size()>0 && force.isEmpty()) {
-				throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "student has enrollments");
+	public void deleteStudent(Principal p, @PathVariable("id") int id, @RequestParam("force") Optional<String> force) {
+		User user = userRespository.findByUsername(p.getName());
+		if(user.getRole().equals( "ADMIN")) {
+			Student s = studentRepository.findById(id).orElse(null);
+			if (s!=null) {
+				// are there enrollments?
+				List<Enrollment> list = enrollmentRepository.findByStudentId(id);
+				if (list.size()>0 && force.isEmpty()) {
+					throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "student has enrollments");
+				} else {
+					studentRepository.deleteById(id);
+				}
 			} else {
-				studentRepository.deleteById(id);
+				// if student does not exist.  do nothing
+				return;
 			}
-		} else {
-			// if student does not exist.  do nothing
-			return;
-		}
-		
+		} 
 	}
 
 }

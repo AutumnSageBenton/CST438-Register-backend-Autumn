@@ -15,7 +15,17 @@ public class JwtService {
 	static final String PREFIX = "Bearer";
 	// Generate secret key. Only for the demonstration
 	// You should read it from the application configuration
-	static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+	static  Key key;
+	static final String str= "21825474757a1a6de4d4fe60d8826aebb132127b6baa8152a1210277ef6da3921825474757a1a6de4d4fe60d8826aebb132127b6baa8152a1210277ef6da39";
+	public JwtService() {
+		byte[] val = new byte[str.length()/2];
+		for (int i = 0; i < val.length; i++) {
+		   int index = i * 2;
+		   int j = Integer.parseInt(str.substring(index, index + 2), 16);
+		   val[i] = (byte) j;
+		}
+		key = Keys.hmacShaKeyFor(val);	
+	}
 
 	// Generate JWT token
 	public String getToken(String username) {
